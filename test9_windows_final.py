@@ -26,6 +26,10 @@ check_out_bottom = '//button[normalize-space()="下班簽退"]'
 view_list_bottom = '//button[normalize-space()="查看本日刷卡紀錄"]'
 
 sign_out_bottom = '//button[normalize-space()="重新輸入"]'
+
+def line_broadcast(text):
+    params = {"message": text}
+    requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
     
 def main():
     try:
@@ -62,6 +66,8 @@ def main():
             else:
                 break
     print("系統啟動中...")
+    text = "系統啟動中..."
+    line_broadcast(text)
     
     while True:
         sleep(0.1)
@@ -72,8 +78,7 @@ def main():
                 if(today_buffer != today):
                     print("放假日: ",holiday[i])
                     text = "放假日: " + holiday[i]
-                    params = {"message": text}
-                    requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                    line_broadcast(text)
                 today_buffer = today
         #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
         if(today_buffer != today and today != '6' and today != '7' and today != '0' or date_YMD == Compensatory_leave):  
@@ -98,9 +103,8 @@ def main():
             #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
             print()
             print("--------------------------下次打卡時間:", check_in_time1,"--------------------------")
-            #text = str("下次簽到時間:"+ check_in_time1)
-            #params = {"message": text}
-            #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+            text = str("下次簽到時間:"+ check_in_time1)
+            line_broadcast(text)
             print()
             while True:
                 date_HMS = datetime.now().strftime("%H:%M:%S")
@@ -138,6 +142,8 @@ def main():
                                 alert = driver.switch_to.alert #切換到alert
                                 if(alert.text == "【提醒您】自即日起，每日須至本校新型冠狀病毒(COVID-19)資訊平台專區登錄健康資訊，或掃描足跡 QR Code 亦可登錄相關資訊。"):
                                     #print('alert text : ' + alert.text) #列印alert的文字
+                                    text = str('alert text : ' + alert.text)
+                                    line_broadcast(text)
                                     alert.accept() #點選alert的【確認】按鈕  
                             except:                    
                                 pass
@@ -148,9 +154,7 @@ def main():
                                     #print('alert text : ' + alert.text) #列印alert的文字
                                     alert.accept() #點選alert的【確認】按鈕  
                             except:                    
-                                params = {"message": "簽到失敗"}
-                                requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
-                                sleep(2)
+                                pass
                             
                             now_handle = driver.current_window_handle #主視窗編號
                             #print("簽到視窗編號 : " , now_handle)
@@ -175,14 +179,14 @@ def main():
                                         submit_bottom = driver.find_element_by_xpath("//*[@id='submit_by_acpw']")
                                         submit_bottom.click()
                                     except Exception as e:
-                                        pass
+                                        line_broadcast("新型冠狀病毒（COVID-19）資訊平台專區登入button有誤")
                             
                                     sleep(2)
                                     b = driver.find_elements_by_xpath("//*[contains(text(), '回報今日健康資訊')]")
                                     if len(b) > 0:
                                         print("正在填寫健康聲明書.........")
-                                        params = {"message": "正在填寫健康聲明書"}
-                                        requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                                        text = "正在填寫健康聲明書"
+                                        line_broadcast(text)
                                         answers = driver.find_elements_by_css_selector("div[class='form-control2 input-group']")
                                         for answer in answers:
                                             try:
@@ -212,19 +216,28 @@ def main():
                                         try:
                                             submit_bottom = driver.find_element_by_xpath("//*[@id='arch_grid']/div[3]/form/div/div/div[3]/button[1]")
                                             submit_bottom.click()
+                                            text = "健康聲明填寫完畢"
+                                            line_broadcast(text)
+                                        except:
+                                            text = "健康聲明填寫異常"
+                                            line_broadcast(text)
+                                        try:
                                             time.sleep(1)
                                             submit_bottom = driver.find_element_by_xpath("//*[@id='msg']/div[2]/div/div[3]/button")
                                             submit_bottom.click()
                                         except:
-                                            pass
-                                        #print("健康聲明填寫完畢 !")  
+                                            text = "存檔成功沒按掉"
+                                            line_broadcast(text)    
                                         try:
                                             driver.switch_to_window(now_handle)  
                                             #print("切回簽到視窗提供觀看..")
                                         except:
-                                            pass                               
+                                            text = "視窗沒切回簽到"
+                                            line_broadcast(text)                                 
                         except Exception as e:
-                            pass
+                            text = "簽到失敗"
+                            line_broadcast(text)
+                            sleep(2)
                             
                         sleep(1)
                         
@@ -268,15 +281,14 @@ def main():
                                     
                             
                         if(check_list_arry[0][2] == '上班'):
-                            params = {"message": "簽到成功"}
-                            requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                            text = "簽到成功"
+                            line_broadcast(text)
                             sleep(2)
                             check_in_time = check_list_arry[0][3].split(":")  
                             print()
                             print("--------------------------本日簽到上班時間為:", datetime.now().strftime('%Y-%m-%d'), check_list_arry[0][3]+datetime.now().strftime(':%S'),"--------------------------")
                             text = str("本日簽到時間為:"+ datetime.now().strftime('%Y-%m-%d ')+ check_list_arry[0][3]+datetime.now().strftime(':%S'))
-                            params = {"message": text}
-                            requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                            line_broadcast(text)
                             print()
                         #print("check_in_time: ",check_in_time)
                         check_in_time = int(check_in_time[0])*60 + int(check_in_time[1])
@@ -371,8 +383,8 @@ def main():
                         
 
                         if(check_list_arry[len(trlist)-4][2] == '下班'):
-                            params = {"message": check_out_print}
-                            requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                            text = check_out_print
+                            line_broadcast(text)
 
 
                         d = driver.find_elements_by_xpath("//*[contains(text(), '簽退不符合規定訊息')]")  
@@ -398,8 +410,7 @@ def main():
                                 submit_bottom.click()
                                 print("下班打卡完畢 !") 
                                 text = "簽退成功 !"
-                                params = {"message": text}
-                                requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+                                line_broadcast(text)
                             except:
                                 pass
                         try:
