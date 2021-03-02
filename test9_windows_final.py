@@ -120,6 +120,12 @@ def main():
                         #print ("最小化：(" + str(driver.get_window_size().get("width")) + "," + str(driver.get_window_size().get("height")) + ")")
                         #driver.implicitly_wait(1)
                         driver.get('https://eadm.ncku.edu.tw/welldoc/ncku/iftwd/signIn.php')
+                        sleep(1)
+                        now_handle = driver.current_window_handle #主視窗編號
+                        #print("簽到視窗編號 : " , now_handle)
+                        text = "主視窗編號:" + now_handle
+                        line_broadcast(text)
+                        
                         user_id = driver.find_element_by_xpath("//*[@id='psnCode']")
                         user_id.send_keys(str(usrid))
                         user_id = driver.find_element_by_xpath("//*[@id='password']")
@@ -156,8 +162,7 @@ def main():
                             except:                    
                                 pass
                             
-                            now_handle = driver.current_window_handle #主視窗編號
-                            #print("簽到視窗編號 : " , now_handle)
+                            
                             sleep(2)
                             #driver1.get('https://app.pers.ncku.edu.tw/ncov/index.php?auth')
                             all_handles = driver.window_handles #全部視窗控制權
@@ -166,15 +171,20 @@ def main():
                                 if handle != now_handle:     
                                     #輸出待選擇的視窗控制代碼  
                                     #print("今日健康資訊視窗編號 : ",handle) #  
+                                    text = "今日健康資訊視窗編號:" + handle
+                                    line_broadcast(text)
                                     driver.switch_to_window(handle)  
                                     time.sleep(1)  
                                     
-                                    #print("登入今日健康資訊視窗編號.... ") 
-                                    user_id = driver.find_element_by_xpath("//*[@id='user_id']")
-                                    user_id.send_keys(str(usrid))
-                                    user_id = driver.find_element_by_xpath("//*[@id='passwd']")
-                                    user_id.send_keys(str(password))
-                                    
+                                    try:
+                                        #print("登入今日健康資訊視窗編號.... ") 
+                                        user_id = driver.find_element_by_xpath("//*[@id='user_id']")
+                                        user_id.send_keys(str(usrid))
+                                        user_id = driver.find_element_by_xpath("//*[@id='passwd']")
+                                        user_id.send_keys(str(password))
+                                    except Exception as e:
+                                        print(e)
+                                        
                                     try:
                                         submit_bottom = driver.find_element_by_xpath("//*[@id='submit_by_acpw']")
                                         submit_bottom.click()
