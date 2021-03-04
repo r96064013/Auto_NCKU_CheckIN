@@ -111,188 +111,148 @@ def check_in_procedure(usrid, password):
   
     #usrid ="10908103"
     #password="14840430"
-    today_buffer = "0"
-    while True:
-        sleep(0.1)
-        today=str(time.strftime("%w"))
-        date_YMD = datetime.now().strftime('%Y-%m-%d')
-        for i in range(len(holiday)):
-            if(date_YMD == holiday[i]):
-                if(today_buffer != today):
-                    print("放假日: ",holiday[i])
-                    text = "放假日: " + holiday[i]
+    
+    #print(datetime.now().strftime('%H:%M:%S'),"----1----") 
+    
+    driver = open_browser()
+    checkin_account_password_input(driver, usrid, password) 
+    sleep(1)
+    
+    now_handle = driver.current_window_handle #主視窗編號
+    print("簽到視窗編號 : " , now_handle)
+    text = "主視窗編號:" + now_handle
+    line_broadcast(text)
+    
+    try:
+        submit_botton = driver.find_element_by_xpath(check_in_botton)
+        submit_botton.click()
+    except Exception as e:
+        text = "簽到失敗"
+        line_broadcast(text)
+        print(e," line:281")
+    
+    sleep(2)    
+    try:
+        alert = driver.switch_to.alert #切換到alert
+        if(alert.text == "遲到!您最晚的上班的時間為 08:30"):
+            #print('alert text : ' + alert.text) #列印alert的文字
+            alert.accept() #點選alert的【確認】按鈕  
+    except:                    
+        pass
+    sleep(0.5)
+    try:
+        alert = driver.switch_to.alert #切換到alert
+        if(alert.text == "【提醒您】自即日起，每日須至本校新型冠狀病毒(COVID-19)資訊平台專區登錄健康資訊，或掃描足跡 QR Code 亦可登錄相關資訊。"):
+            #print('alert text : ' + alert.text) #列印alert的文字
+            text = str('alert text : ' + alert.text)
+            line_broadcast(text)
+            alert.accept() #點選alert的【確認】按鈕  
+    except:                    
+        pass
+    sleep(0.5)
+    try:
+        alert = driver.switch_to.alert #切換到alert
+        if(alert.text == "遲到!您最晚的上班的時間為 08:30"):
+            #print('alert text : ' + alert.text) #列印alert的文字
+            alert.accept() #點選alert的【確認】按鈕  
+    except:                    
+        pass
+    sleep(2)
+    #driver1.get('https://app.pers.ncku.edu.tw/ncov/index.php?auth')
+    all_handles = driver.window_handles #全部視窗控制權
+    #driver.switch_to_window(now_handle)
+    for handle in all_handles:  
+        if handle != now_handle:     
+            #輸出待選擇的視窗控制代碼  
+            print("今日健康資訊視窗編號 : ",handle) #  
+            text = "今日健康資訊視窗編號:" + handle
+            line_broadcast(text)
+            driver.switch_to_window(handle)  
+            time.sleep(1)  
+            
+            try:
+                print("登入今日健康資訊視窗編號.... ") 
+                survey_account_password_input(driver, usrid, password)
+            except Exception as e:
+                pass
+                
+            try:
+                submit_botton = driver.find_element_by_xpath("//*[@id='submit_by_acpw']")
+                submit_botton.click()
+            except Exception as e:
+                line_broadcast("新型冠狀病毒（COVID-19）資訊平台專區登入button有誤")
+    
+            sleep(2)
+            b = driver.find_elements_by_xpath("//*[contains(text(), '回報今日健康資訊')]")
+            if len(b) > 0:
+                print("正在填寫健康聲明書.........")
+                text = "正在填寫健康聲明書"
+                line_broadcast(text)
+                answers = driver.find_elements_by_css_selector("div[class='form-control2 input-group']")
+                for answer in answers:
+                    try:
+                        #print(answer)
+                        ans = answer.find_elements_by_css_selector('label')
+                        #li = random.choice(ans)
+                      
+                        if(len(ans)>10):
+                            li = ans[15]
+                            li.click()
+                            time.sleep(0.1)
+                        else:
+                            li = ans[0]
+                            li.click()
+                            time.sleep(0.1)
+                        #eee = eee + 300
+                        #$driver.execute_script(c+str(eee)+d)
+                    except Exception as e:
+                        #print("click error: " ,e)
+                        pass
+                    try:
+                        text = answer.find_element_by_css_selector("input[name='stay_1_other'][type='text']")
+                        text.send_keys(location)
+                    except Exception as c:
+                        #print("send_keys error: ",c)
+                        pass
+                try:
+                    submit_botton = driver.find_element_by_xpath("//*[@id='arch_grid']/div[3]/form/div/div/div[3]/button[1]")
+                    submit_botton.click()
+                    text = "健康聲明填寫完畢"
                     line_broadcast(text)
-                today_buffer = today
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
-        if(today_buffer != today and today != '6' and today != '7' and today != '0' or date_YMD == Compensatory_leave):  
-            #print(today)  
-            minute = str(random.randint(0,17))
-            minute = minute.zfill(2)
-            second = str(random.randint(0,59))
-            second = second.zfill(2)
-            
-            check_in_time1 = "08:" + minute +":"+ second
-            '''
-            if((int(datetime.now().strftime("%S")) + 15) > 59):
-                check_in_time1 = datetime.now().strftime("%H") + ":" + str(int(datetime.now().strftime("%M")) + 1) + ":15" 
-            else:
-                check_in_time1 = datetime.now().strftime("%H:%M") + ":" + str(int(datetime.now().strftime("%S")) + 15)
-            '''     
-            
-            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)
-            #text = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+" 星期"+ today)
-            #params = {"message": text}
-            #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
-            print()
-            print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
-            text = str("下次簽到時間(尚未簽到):"+ check_in_time1)
+                except:
+                    text = "健康聲明填寫異常"
+                    line_broadcast(text)
+                try:
+                    time.sleep(1)
+                    submit_botton = driver.find_element_by_xpath("//*[@id='msg']/div[2]/div/div[3]/button")
+                    submit_botton.click()
+                except:
+                    text = "存檔成功沒按掉"
+                    line_broadcast(text)    
+                try:
+                    driver.switch_to_window(now_handle)  
+                    #print("切回簽到視窗提供觀看..")
+                except:
+                    text = "視窗沒切回簽到"
+                    line_broadcast(text)                                                 
+        
+    sleep(1)
+    try:
+        submit_botton = driver.find_element_by_xpath(view_list_botton)
+        submit_botton.click()
+    except Exception as e:
+        print(e," line:287")
+    sleep(1) 
+    check_list_arry = check_work_list(driver)   
+    for x in range(len(check_list_arry)):
+        if(check_list_arry[x][2]=='上班'):
+            text = str("本日簽到資訊為:"+str(check_list_arry[x]))
             line_broadcast(text)
             print()
-            while True:
-                date_HMS = datetime.now().strftime("%H:%M:%S")
-                if(date_HMS == check_in_time1):
-                    #print(datetime.now().strftime('%H:%M:%S'),"----1----") 
-                    sleep(1)
-                    if(today != today_buffer):
-                        driver = open_browser()
-                        checkin_account_password_input(driver, usrid, password) 
-                        sleep(1)
-                        
-                        now_handle = driver.current_window_handle #主視窗編號
-                        print("簽到視窗編號 : " , now_handle)
-                        text = "主視窗編號:" + now_handle
-                        line_broadcast(text)
-                        
-                        try:
-                            submit_botton = driver.find_element_by_xpath(check_in_botton)
-                            submit_botton.click()
-                        except Exception as e:
-                            text = "簽到失敗"
-                            line_broadcast(text)
-                            print(e," line:281")
-                        
-                        sleep(2)    
-                        try:
-                            alert = driver.switch_to.alert #切換到alert
-                            if(alert.text == "遲到!您最晚的上班的時間為 08:30"):
-                                #print('alert text : ' + alert.text) #列印alert的文字
-                                alert.accept() #點選alert的【確認】按鈕  
-                        except:                    
-                            pass
-                        sleep(0.5)
-                        try:
-                            alert = driver.switch_to.alert #切換到alert
-                            if(alert.text == "【提醒您】自即日起，每日須至本校新型冠狀病毒(COVID-19)資訊平台專區登錄健康資訊，或掃描足跡 QR Code 亦可登錄相關資訊。"):
-                                #print('alert text : ' + alert.text) #列印alert的文字
-                                text = str('alert text : ' + alert.text)
-                                line_broadcast(text)
-                                alert.accept() #點選alert的【確認】按鈕  
-                        except:                    
-                            pass
-                        sleep(0.5)
-                        try:
-                            alert = driver.switch_to.alert #切換到alert
-                            if(alert.text == "遲到!您最晚的上班的時間為 08:30"):
-                                #print('alert text : ' + alert.text) #列印alert的文字
-                                alert.accept() #點選alert的【確認】按鈕  
-                        except:                    
-                            pass
-                        sleep(2)
-                        #driver1.get('https://app.pers.ncku.edu.tw/ncov/index.php?auth')
-                        all_handles = driver.window_handles #全部視窗控制權
-                        #driver.switch_to_window(now_handle)
-                        for handle in all_handles:  
-                            if handle != now_handle:     
-                                #輸出待選擇的視窗控制代碼  
-                                print("今日健康資訊視窗編號 : ",handle) #  
-                                text = "今日健康資訊視窗編號:" + handle
-                                line_broadcast(text)
-                                driver.switch_to_window(handle)  
-                                time.sleep(1)  
-                                
-                                try:
-                                    print("登入今日健康資訊視窗編號.... ") 
-                                    survey_account_password_input(driver, usrid, password)
-                                except Exception as e:
-                                    pass
-                                    
-                                try:
-                                    submit_botton = driver.find_element_by_xpath("//*[@id='submit_by_acpw']")
-                                    submit_botton.click()
-                                except Exception as e:
-                                    line_broadcast("新型冠狀病毒（COVID-19）資訊平台專區登入button有誤")
-                        
-                                sleep(2)
-                                b = driver.find_elements_by_xpath("//*[contains(text(), '回報今日健康資訊')]")
-                                if len(b) > 0:
-                                    print("正在填寫健康聲明書.........")
-                                    text = "正在填寫健康聲明書"
-                                    line_broadcast(text)
-                                    answers = driver.find_elements_by_css_selector("div[class='form-control2 input-group']")
-                                    for answer in answers:
-                                        try:
-                                            #print(answer)
-                                            ans = answer.find_elements_by_css_selector('label')
-                                            #li = random.choice(ans)
-                                          
-                                            if(len(ans)>10):
-                                                li = ans[15]
-                                                li.click()
-                                                time.sleep(0.1)
-                                            else:
-                                                li = ans[0]
-                                                li.click()
-                                                time.sleep(0.1)
-                                            #eee = eee + 300
-                                            #$driver.execute_script(c+str(eee)+d)
-                                        except Exception as e:
-                                            #print("click error: " ,e)
-                                            pass
-                                        try:
-                                            text = answer.find_element_by_css_selector("input[name='stay_1_other'][type='text']")
-                                            text.send_keys(location)
-                                        except Exception as c:
-                                            #print("send_keys error: ",c)
-                                            pass
-                                    try:
-                                        submit_botton = driver.find_element_by_xpath("//*[@id='arch_grid']/div[3]/form/div/div/div[3]/button[1]")
-                                        submit_botton.click()
-                                        text = "健康聲明填寫完畢"
-                                        line_broadcast(text)
-                                    except:
-                                        text = "健康聲明填寫異常"
-                                        line_broadcast(text)
-                                    try:
-                                        time.sleep(1)
-                                        submit_botton = driver.find_element_by_xpath("//*[@id='msg']/div[2]/div/div[3]/button")
-                                        submit_botton.click()
-                                    except:
-                                        text = "存檔成功沒按掉"
-                                        line_broadcast(text)    
-                                    try:
-                                        driver.switch_to_window(now_handle)  
-                                        #print("切回簽到視窗提供觀看..")
-                                    except:
-                                        text = "視窗沒切回簽到"
-                                        line_broadcast(text)                                                 
-                            
-                        sleep(1)
-                        try:
-                            submit_botton = driver.find_element_by_xpath(view_list_botton)
-                            submit_botton.click()
-                        except Exception as e:
-                            print(e," line:287")
-                        sleep(1) 
-                        check_list_arry = check_work_list(driver)   
-                        for x in range(len(check_list_arry)):
-                            if(check_list_arry[x][2]=='上班'):
-                                text = str("本日簽到時間為:"+str(check_list_arry[x]))
-                                line_broadcast(text)
-                                print()
-                                print("本日簽到時間為:",str(check_list_arry[x]))
-                                print()
-                                driver.quit()
-                                break
+            print("本日簽到資訊為:",str(check_list_arry[x]))
+            print()
+            driver.quit()
+            break
     
 def check_out_procedure(check_list_arry, check_out_number, usrid, password):
      
@@ -364,10 +324,10 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
     for x in range(len(check_list_arry)):
         if(check_list_arry[len(check_list_arry)-x-1][2]=='下班'):
             #print(check_list_arry[len(check_list_arry)-x-1])
-            text = str("本日簽退時間為:"+str(check_list_arry[len(check_list_arry)-x-1]))
+            text = str("本日簽退資訊為:"+str(check_list_arry[len(check_list_arry)-x-1]))
             line_broadcast(text)
             print()
-            print("本日簽退時間為:",str(check_list_arry[len(check_list_arry)-x-1]))
+            print("本日簽退資訊為:",str(check_list_arry[len(check_list_arry)-x-1]))
             print()
             break
     try:
@@ -401,29 +361,82 @@ if __name__ == '__main__':
         submit_botton = driver.find_element_by_xpath(view_list_botton)
         submit_botton.click()
     except Exception as e:
-        print(e)
-        
+        print(e)      
     check_list_arry = check_work_list(driver)
-    if(len(check_list_arry) == 0):   
-        driver.quit()
-        check_in_procedure(usrid, password)
-    elif(len(check_list_arry) > 1):
-        driver.quit()
-        check_out_number = -1
-        for i in range(len(check_list_arry)):
-            if(check_list_arry[i][2]=='上班'):
-                check_out_number = i 
-                break
-        if(check_out_number != -1):
-            check_out_procedure(check_list_arry, check_out_number, usrid, password)
-            
-   
-  
+    sleep(1)
+    driver.quit()
     
+    today_buffer = "0"
+    while True:
+        sleep(0.1)
+        today=str(time.strftime("%w"))
+        date_YMD = datetime.now().strftime('%Y-%m-%d')
+        for i in range(len(holiday)):
+            if(date_YMD == holiday[i]):
+                if(today_buffer != today):
+                    print("放假日: ",holiday[i])
+                    text = "放假日: " + holiday[i]
+                    line_broadcast(text)
+                today_buffer = today
+        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
+        if(today_buffer != today and today != '6' and today != '7' and today != '0' or date_YMD == Compensatory_leave):  
+            #print(today)  
+            minute = str(random.randint(0,17))
+            minute = minute.zfill(2)
+            second = str(random.randint(0,59))
+            second = second.zfill(2)
+            
+            check_in_time1 = "08:" + minute +":"+ second
+            '''
+            if((int(datetime.now().strftime("%S")) + 15) > 59):
+                check_in_time1 = datetime.now().strftime("%H") + ":" + str(int(datetime.now().strftime("%M")) + 1) + ":15" 
+            else:
+                check_in_time1 = datetime.now().strftime("%H:%M") + ":" + str(int(datetime.now().strftime("%S")) + 15)
+            '''     
+            
+            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)
+            #text = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+" 星期"+ today)
+            #params = {"message": text}
+            #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
+            print()
+            print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
+            text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
+            line_broadcast(text)
+            print()
+            check_out_again_flag = -1  
+            while True:
+                date_HMS = datetime.now().strftime("%H:%M:%S")
+                if(date_HMS == check_in_time1 and len(check_list_arry) == 0):
+                    sleep(1)
+                    if(today != today_buffer):
+                        check_in_procedure(usrid, password)
+                        break
+                elif(len(check_list_arry) > 1 and check_out_again_flag == -1):
+                    check_out_number = -1
+                    for i in range(len(check_list_arry)):
+                        if(check_list_arry[i][2]=='上班'):
+                            check_out_number = i 
+                            break  
+                    for i in range(len(check_list_arry)):
+                        if(check_list_arry[len(check_list_arry)-i-1][2]=='下班'):
+                            check_out_again_flag = i
+                            print("今日已經打過卡，打卡資訊為：")
+                            print(check_list_arry[check_out_number])
+                            print(check_list_arry[len(check_list_arry)-i-1])                   
+                            line_broadcast("今日已打卡的資訊為：")
+                            line_broadcast(  str(check_list_arry[check_out_number]))
+                            line_broadcast(  str(check_list_arry[len(check_list_arry)-i-1]))
+                            print()
+                            print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
+                            text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
+                            line_broadcast(text)
+                            print()
+                            break
+                    if(check_out_number != -1 and check_out_again_flag == -1): #有上班沒下班的情況
+                        check_out_procedure(check_list_arry, check_out_number, usrid, password)
+                        break
 
-
-
-
+                        
 
 
 
