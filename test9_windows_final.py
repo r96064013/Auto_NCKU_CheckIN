@@ -23,16 +23,16 @@ sign_out_botton = '//button[normalize-space()="重新輸入"]'
 def job(set_time_minute):
     
   time_set = float(set_time_minute) * 60
-  SYSJ = None  # 剩余时间
+  SYSJ = None 
   start_time = time.time()
   while True:
-    t1 = time.time() - start_time  # 计时时间间隔
-    SYSJ = time_set - t1  # 剩余时间
-    m, s = divmod(SYSJ, 60)  # 获取分， 秒
-    h, m = divmod(m, 60)  # 获取小时，分
+    t1 = time.time() - start_time  
+    SYSJ = time_set - t1  
+    m, s = divmod(SYSJ, 60)  
+    h, m = divmod(m, 60)  
     if SYSJ > 0:
-        # print("%02d:%02d:%02d" % (h, m, s))  正常打印
-        print("\r目前剩餘: %02d:%02d:%02d 分鐘可簽退.." % (h, m, s),end="")  # 每次把光标定位到行首，打印
+        # print("%02d:%02d:%02d" % (h, m, s))  
+        print("\r目前剩餘: %02d:%02d:%02d 分鐘可簽退.." % (h, m, s),end="")  
     else:
         #print("\n倒數")
         #playsound('clock_bell.mp3', block=True)
@@ -284,9 +284,9 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
         driver = open_browser()
         checkin_account_password_input(driver, usrid, password)      
         try:
-            sleep_time = (random.randint(0,59))
-            print("sleep_time: ",sleep_time)
-            time.sleep(int(sleep_time))
+            sleep_time = (random.randint(0,30))/10
+            print("隨機等待: ", sleep_time, "分鐘，以防止被系統抓到自動打卡")
+            job(sleep_time)
             submit_botton = driver.find_element_by_xpath(check_out_botton)
             submit_botton.click()
         except:
@@ -300,9 +300,9 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
             if(check_out_time - check_in_time >= 540):
                 driver = open_browser()
                 checkin_account_password_input(driver, usrid, password)  
-                sleep_time = (random.randint(0,59))
-                print("sleep_time: ",sleep_time)
-                time.sleep(int(sleep_time))
+                sleep_time = (random.randint(0,30))/10
+                print("隨機等待: ", sleep_time, "分鐘，以防止被系統抓到自動打卡")
+                job(sleep_time)
                 submit_botton = driver.find_element_by_xpath(check_out_botton)
                 submit_botton.click()
                 break
