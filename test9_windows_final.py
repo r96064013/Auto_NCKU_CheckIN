@@ -355,6 +355,7 @@ if __name__ == '__main__':
                 pass
             else:
                 break
+    print("網頁與帳號密碼測試中....")
     driver = open_browser()
     checkin_account_password_input(driver, usrid, password)
     try:
@@ -381,6 +382,19 @@ if __name__ == '__main__':
         #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
         if(today_buffer != today and today != '6' and today != '7' and today != '0' or date_YMD == Compensatory_leave):  
             #print(today)  
+            today_buffer = today
+            
+            driver = open_browser()
+            checkin_account_password_input(driver, usrid, password)
+            try:
+                submit_botton = driver.find_element_by_xpath(view_list_botton)
+                submit_botton.click()
+            except Exception as e:
+                print(e)      
+            check_list_arry = check_work_list(driver)
+            sleep(1)
+            driver.quit()
+            
             minute = str(random.randint(0,17))
             minute = minute.zfill(2)
             second = str(random.randint(0,59))
@@ -404,15 +418,15 @@ if __name__ == '__main__':
             line_broadcast(text)
             print()
             check_out_again_flag = -1  
+            checkin_flag = 0
             while True:
                 date_HMS = datetime.now().strftime("%H:%M:%S")
-                if(date_HMS == check_in_time1 and len(check_list_arry) == 0):
-                    sleep(1)
-                    if(today != today_buffer):
-                        check_in_procedure(usrid, password)
-                        break
-                elif(len(check_list_arry) > 1 and check_out_again_flag == -1):
+                if(date_HMS == check_in_time1 and len(check_list_arry)== 0):
+                    check_in_procedure(usrid, password)
+                    checkin_flag = 1
+                elif(len(check_list_arry) >= 1 and check_out_again_flag == -1 or checkin_flag == 1):
                     check_out_number = -1
+                    checkin_flag = 0
                     for i in range(len(check_list_arry)):
                         if(check_list_arry[i][2]=='上班'):
                             check_out_number = i 
@@ -434,6 +448,7 @@ if __name__ == '__main__':
                             break
                     if(check_out_number != -1 and check_out_again_flag == -1): #有上班沒下班的情況
                         check_out_procedure(check_list_arry, check_out_number, usrid, password)
+                        check_list_arry=''
                         break
 
                         
