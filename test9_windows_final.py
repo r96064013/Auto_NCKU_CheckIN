@@ -20,6 +20,24 @@ check_out_botton = '//button[normalize-space()="下班簽退"]'
 view_list_botton = '//button[normalize-space()="查看本日刷卡紀錄"]'
 sign_out_botton = '//button[normalize-space()="重新輸入"]'
 
+def job(set_time_minute):
+    
+  time_set = float(set_time_minute) * 60
+  SYSJ = None  # 剩余时间
+  start_time = time.time()
+  while True:
+    t1 = time.time() - start_time  # 计时时间间隔
+    SYSJ = time_set - t1  # 剩余时间
+    m, s = divmod(SYSJ, 60)  # 获取分， 秒
+    h, m = divmod(m, 60)  # 获取小时，分
+    if SYSJ > 0:
+        # print("%02d:%02d:%02d" % (h, m, s))  正常打印
+        print("\r目前剩餘: %02d:%02d:%02d 分鐘可簽退.." % (h, m, s),end="")  # 每次把光标定位到行首，打印
+    else:
+        #print("\n倒數")
+        #playsound('clock_bell.mp3', block=True)
+        break
+    
 def read_setup_file():
     try:
         with open('請設定帳號密碼.csv', newline='') as csvfile:
@@ -289,9 +307,12 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
                 submit_botton.click()
                 break
             elif(datetime.now().strftime('%H:%M:%S') != change_time):
+                job(abs(check_out_time - (check_in_time + 540)))
+                '''
                 if(datetime.now().strftime('%S') == '03' and datetime.now().strftime('%H') == '17'):
                     print("目前時間: ",datetime.now().strftime('%H:%M')," 目前剩餘 : ", abs(check_out_time - (check_in_time + 540)), " 分鐘可簽退..")
                     change_time = datetime.now().strftime('%H:%M:%S')
+                '''   
     d = driver.find_elements_by_xpath("//*[contains(text(), '簽退不符合規定訊息')]")  
     if len(d) > 0:
         time.sleep(2)
