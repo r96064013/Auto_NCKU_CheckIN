@@ -270,7 +270,8 @@ def check_in_procedure(usrid, password):
             print("本日簽到資訊為:",str(check_list_arry[x]))
             print()
             driver.quit()
-            break
+            return check_list_arry
+            
     
 def check_out_procedure(check_list_arry, check_out_number, usrid, password):
      
@@ -360,7 +361,8 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
        pass
     #print("關閉視窗.....")  
     driver.quit()
-    print("等待上班時間....")              
+    print("等待上班時間....") 
+             
 
 if __name__ == '__main__':
     read_setup_list = read_setup_file()
@@ -388,6 +390,7 @@ if __name__ == '__main__':
     sleep(1)
     driver.quit()
     
+    today_buffer_flag = 0
     today_buffer = "0"
     while True:
         sleep(0.1)
@@ -400,7 +403,11 @@ if __name__ == '__main__':
                     text = "放假日: " + holiday[i]
                     line_broadcast(text)
                 today_buffer = today
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
+        
+        if(today != today_buffer_flag):
+            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)   
+            today_buffer_flag = today
+            
         if(today_buffer != today and today != '6' and today != '7' and today != '0' or date_YMD == Compensatory_leave):  
             #print(today)  
             today_buffer = today
@@ -413,6 +420,7 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)      
             check_list_arry = check_work_list(driver)
+            print("check_list_arry:",check_list_arry,"check_list_arry len:", len(check_list_arry),datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)
             sleep(1)
             driver.quit()
             
@@ -429,7 +437,7 @@ if __name__ == '__main__':
                 check_in_time1 = datetime.now().strftime("%H:%M") + ":" + str(int(datetime.now().strftime("%S")) + 15)
             '''     
             
-            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)
+            #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S')," 星期", today)
             #text = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+" 星期"+ today)
             #params = {"message": text}
             #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
@@ -443,7 +451,7 @@ if __name__ == '__main__':
             while True:
                 date_HMS = datetime.now().strftime("%H:%M:%S")
                 if(date_HMS == check_in_time1 and len(check_list_arry)== 0):
-                    check_in_procedure(usrid, password)
+                    check_list_arry = check_in_procedure(usrid, password)
                     checkin_flag = 1
                 elif(len(check_list_arry) >= 1 and check_out_again_flag == -1 or checkin_flag == 1):
                     check_out_number = -1
@@ -461,15 +469,18 @@ if __name__ == '__main__':
                             line_broadcast("今日已打卡的資訊為：")
                             line_broadcast(  str(check_list_arry[check_out_number]))
                             line_broadcast(  str(check_list_arry[len(check_list_arry)-i-1]))
-                            print()
-                            print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
-                            text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
-                            line_broadcast(text)
-                            print()
+                            #check_list_arry=''
+                            today_buffer_flag = 0
+                            #print()
+                            #print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
+                            #text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
+                            #line_broadcast(text)
+                            #print()
                             break
                     if(check_out_number != -1 and check_out_again_flag == -1): #有上班沒下班的情況
                         check_out_procedure(check_list_arry, check_out_number, usrid, password)
-                        check_list_arry=''
+                        #check_list_arry=''
+                        today_buffer_flag = 0
                         break
 
                         
