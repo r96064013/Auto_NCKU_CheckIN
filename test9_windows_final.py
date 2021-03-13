@@ -14,7 +14,9 @@ holiday = ["2021-02-10", "2021-02-11", "2021-02-12", "2021-02-13", "2021-02-14",
                "2021-06-14", "2021-09-18","2021-09-19","2021-10-11","2021-12-31"]
 Compensatory_leave =  "2021-02-20"
     
-headers = {"Authorization": "Bearer " + "DFFr19CQ6rd4UY9jjemSxyBtqoWtIDn8TNlWDPlpBjn","Content-Type": "application/x-www-form-urlencoded"}
+#headers = {"Authorization": "Bearer " + "DFFr19CQ6rd4UY9jjemSxyBtqoWtIDn8TNlWDPlpBjn","Content-Type": "application/x-www-form-urlencoded"}
+headers = {"Authorization": "Bearer " + "7LwRSUF2SQfjwrK8xKILCzYrSYZ8QHwItcG3ryyE9kN","Content-Type": "application/x-www-form-urlencoded"}
+
 check_in_botton = '//button[normalize-space()="上班簽到"]'
 check_out_botton = '//button[normalize-space()="下班簽退"]'
 view_list_botton = '//button[normalize-space()="查看本日刷卡紀錄"]'
@@ -125,6 +127,7 @@ def line_broadcast(text):
     params = {"message": text}
     requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
     
+    
 def check_in_procedure(usrid, password):
   
     #usrid ="10908103"
@@ -138,8 +141,8 @@ def check_in_procedure(usrid, password):
     
     now_handle = driver.current_window_handle #主視窗編號
     print("簽到視窗編號 : " , now_handle)
-    text = "主視窗編號:" + now_handle
-    line_broadcast(text)
+    #text = "主視窗編號:" + now_handle
+    #line_broadcast(text)
     
     try:
         submit_botton = driver.find_element_by_xpath(check_in_botton)
@@ -153,7 +156,7 @@ def check_in_procedure(usrid, password):
     try:
         alert = driver.switch_to.alert #切換到alert
         if(alert.text == "遲到!您最晚的上班的時間為 08:30"):
-            #print('alert text : ' + alert.text) #列印alert的文字
+            print('alert text : ' + alert.text) #列印alert的文字
             alert.accept() #點選alert的【確認】按鈕  
     except:                    
         pass
@@ -161,9 +164,9 @@ def check_in_procedure(usrid, password):
     try:
         alert = driver.switch_to.alert #切換到alert
         if(alert.text == "【提醒您】自即日起，每日須至本校新型冠狀病毒(COVID-19)資訊平台專區登錄健康資訊，或掃描足跡 QR Code 亦可登錄相關資訊。"):
-            #print('alert text : ' + alert.text) #列印alert的文字
-            text = str('alert text : ' + alert.text)
-            line_broadcast(text)
+            print('alert text : ' + alert.text) #列印alert的文字
+            #text = str('alert text : ' + alert.text)
+            #line_broadcast(text)
             alert.accept() #點選alert的【確認】按鈕  
     except:                    
         pass
@@ -183,8 +186,8 @@ def check_in_procedure(usrid, password):
         if handle != now_handle:     
             #輸出待選擇的視窗控制代碼  
             print("今日健康資訊視窗編號 : ",handle) #  
-            text = "今日健康資訊視窗編號:" + handle
-            line_broadcast(text)
+            #text = "今日健康資訊視窗編號:" + handle
+            #line_broadcast(text)
             driver.switch_to_window(handle)  
             time.sleep(1)  
             
@@ -204,8 +207,8 @@ def check_in_procedure(usrid, password):
             b = driver.find_elements_by_xpath("//*[contains(text(), '回報今日健康資訊')]")
             if len(b) > 0:
                 print("正在填寫健康聲明書.........")
-                text = "正在填寫健康聲明書"
-                line_broadcast(text)
+                #text = "正在填寫健康聲明書"
+                #line_broadcast(text)
                 answers = driver.find_elements_by_css_selector("div[class='form-control2 input-group']")
                 for answer in answers:
                     try:
@@ -237,6 +240,7 @@ def check_in_procedure(usrid, password):
                     submit_botton.click()
                     text = "健康聲明填寫完畢"
                     line_broadcast(text)
+                  
                 except:
                     text = "健康聲明填寫異常"
                     line_broadcast(text)
@@ -264,8 +268,9 @@ def check_in_procedure(usrid, password):
     check_list_arry = check_work_list(driver)   
     for x in range(len(check_list_arry)):
         if(check_list_arry[x][2]=='上班'):
-            text = str("本日簽到資訊為:"+str(check_list_arry[x]))
+            text = str("依蓉我幫妳簽到了喔 :D，本日簽到資訊為:"+str(check_list_arry[x]))
             line_broadcast(text)
+           
             print()
             print("本日簽到資訊為:",str(check_list_arry[x]))
             print()
@@ -346,11 +351,13 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
     for x in range(len(check_list_arry)):
         if(check_list_arry[len(check_list_arry)-x-1][2]=='下班'):
             #print(check_list_arry[len(check_list_arry)-x-1])
-            text = str("本日簽退資訊為:"+str(check_list_arry[len(check_list_arry)-x-1]))
+            text = str("依蓉我幫妳簽退了喔 >///<，本日簽退資訊為:"+str(check_list_arry[len(check_list_arry)-x-1]))
             line_broadcast(text)
+           
             print()
             print("本日簽退資訊為:",str(check_list_arry[len(check_list_arry)-x-1]))
             print()
+            check_out_information = str(check_list_arry[len(check_list_arry)-x-1])
             break
     try:
         time.sleep(4)
@@ -362,6 +369,7 @@ def check_out_procedure(check_list_arry, check_out_number, usrid, password):
     #print("關閉視窗.....")  
     driver.quit()
     print("等待上班時間....") 
+    return check_out_information
              
 
 if __name__ == '__main__':
@@ -443,32 +451,32 @@ if __name__ == '__main__':
             #requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
             print()
             print("--------------------------下次簽到時間(尚未簽到):", check_in_time1,"--------------------------")
-            text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
-            line_broadcast(text)
+            #text = str("預計下次簽到時間為: "+ check_in_time1 + "  目前尚未簽到哦！！！！！")
+            #line_broadcast(text)
             print()
             check_out_again_flag = -1  
             checkin_flag = 0
             while True:
                 date_HMS = datetime.now().strftime("%H:%M:%S")
-                if(date_HMS == check_in_time1 and len(check_list_arry)== 0):
+                if(date_HMS == check_in_time1 and len(check_list_arry)== 0):#沒上班
                     check_list_arry = check_in_procedure(usrid, password)
                     checkin_flag = 1
-                elif(len(check_list_arry) >= 1 and check_out_again_flag == -1 or checkin_flag == 1):
+                elif(len(check_list_arry) >= 1 and check_out_again_flag == -1 or checkin_flag == 1):#有上班
                     check_out_number = -1
                     checkin_flag = 0
                     for i in range(len(check_list_arry)):
-                        if(check_list_arry[i][2]=='上班'):
+                        if(check_list_arry[i][2]=='上班'):#找上班第一筆
                             check_out_number = i 
                             break  
                     for i in range(len(check_list_arry)):
-                        if(check_list_arry[len(check_list_arry)-i-1][2]=='下班'):
+                        if(check_list_arry[len(check_list_arry)-i-1][2]=='下班'): #有上班+有下班
                             check_out_again_flag = i
                             print("今日已經打過卡，打卡資訊為：")
                             print(check_list_arry[check_out_number])
                             print(check_list_arry[len(check_list_arry)-i-1])                   
-                            line_broadcast("今日已打卡的資訊為：")
-                            line_broadcast(  str(check_list_arry[check_out_number]))
-                            line_broadcast(  str(check_list_arry[len(check_list_arry)-i-1]))
+                            #line_broadcast("今日已打卡的資訊為：")
+                            #line_broadcast(  str(check_list_arry[check_out_number]))
+                            #line_broadcast(  str(check_list_arry[len(check_list_arry)-i-1]))
                             #check_list_arry=''
                             today_buffer_flag = 0
                             #print()
@@ -477,10 +485,15 @@ if __name__ == '__main__':
                             #line_broadcast(text)
                             #print()
                             break
+                    if(today_buffer_flag == 0):
+                        break
+                    
                     if(check_out_number != -1 and check_out_again_flag == -1): #有上班沒下班的情況
-                        check_out_procedure(check_list_arry, check_out_number, usrid, password)
+                        check_out_information = check_out_procedure(check_list_arry, check_out_number, usrid, password)
                         #check_list_arry=''
                         today_buffer_flag = 0
+                        #line_broadcast(  str(check_list_arry[check_out_number]))
+                        #line_broadcast(  str(check_out_information))
                         break
 
                         
